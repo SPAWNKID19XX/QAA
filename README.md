@@ -112,6 +112,7 @@ Authorization: Bearer <access_token>
 }
 ```
 
+
 Ошибки:
 - `400` — username уже занят / пароль слишком простой
 

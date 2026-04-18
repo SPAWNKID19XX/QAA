@@ -1,21 +1,47 @@
 import pytest
 from django.contrib.auth import get_user_model
 
-@pytest.fixture(scope='function')
-def existing_user():
+@pytest.fixture
+def user_factory():
   # Here you can set up any necessary data for your tests, such as creating a new user in the 
   # database using ORM-Django
-  
-  # For example:
-  # user = User.objects.create_user(username='testuser', password='testpass')
-  # return user
-  user = get_user_model().objects.create_user(
-    username="testuser", 
-    password="testpass",
-    first_name="test_fn",
-    last_name="test_ln",
-    email="test@example.com",
-    is_staff = True,
-    is_active = True
-  )
-  return user
+  counter = 0
+
+  def create_user(**kwargs):
+    nonlocal counter
+    counter += 1
+    
+    data = {
+      "username": f"user_{counter}",
+      "password": "testpass",
+      "email": f"test_email_{counter}@mail.com",
+      "first_name": f"test_fn{counter}",
+      "last_name": f"test_ln{counter}"
+    }
+
+    data.update(**kwargs)
+
+    return get_user_model().objects.create_user(**data)
+
+  return create_user
+
+@pytest.fixture
+def build_user(**kwargs):
+  counter = 0
+
+  def _build_user(**kwargs):
+    nonlocal counter
+    counter += 1
+
+    data = {
+      "username": f"user_{counter}",
+      "password": "testpass",
+      "first_name": f"test_fn{counter}",
+      "last_name": f"test_ln{counter}",
+      "email": f"testuser{counter}@mail.com",
+    }
+    data.update(**kwargs)
+    return get_user_model() (
+      **data
+    )
+  return _build_user

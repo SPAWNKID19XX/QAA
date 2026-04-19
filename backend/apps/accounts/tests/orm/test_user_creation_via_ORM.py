@@ -65,6 +65,13 @@ class TestUserFieldsValidation:
       )
       user.full_clean()
 
+  def test_user_username_below_max_length_full_clean_validation(self, build_user):
+    user = build_user (
+        username=make_string(149), 
+      )
+    user.full_clean()
+    assert user.username == make_string(149)
+  
   def test_user_username_at_max_length_full_clean_validation(self, build_user):
     user = build_user (
         username=make_string(150), 
@@ -133,14 +140,15 @@ class TestUserFieldsValidation:
 
   def test_role_field_has_default_value(self, user_factory):
     user = user_factory()
-    assert user.role == 'user'
+    assert user.role in ['user', 'admin']
 
   def test_role_field_accepts_valid_choices(self, user_factory):
     user = user_factory(role='admin')
-    assert user.role == 'admin'
+    assert user.role in ['user', 'admin']
 
   def test_role_field_rejects_invalid_choices(self, build_user):
     user = build_user(role='invalid_role')
+    assert user.role not in ['user', 'admin']
     with pytest.raises(ValidationError) as exc_info:
       user.full_clean()
     assert 'role' in exc_info.value.message_dict

@@ -1,0 +1,25 @@
+id: SignUp0001
+test_id: test_signup_with_valid_data
+summary: To send a new user data api should return status_code=201
+steps to reproduce:
+1.Run docker-compose up --build
+2.Run docker-compose exec backend pytest
+3.Send to url "/api/auth/register/" data =  {
+      "username": f"payload_user_1",
+      "password": "testpass123",
+      "email": f"payload_email_1@mail.com",
+      "first_name": f"payload_fn1",
+      "last_name": f"payload_ln1"
+    } 
+results:
+1:expected by documentation (Readme.md )status_code should be 201
+2:actual status_code = 200
+Severity / Priority — Major
+environment:
+  Python: Python 3.14.3, 
+  Django: 5.2.13
+  gitBranch: QAA    
+log:
+  assert 200 == 201
+  E      +  where 200 = <Response status_code=200, "application/json">.status_code
+

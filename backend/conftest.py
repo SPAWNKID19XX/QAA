@@ -64,7 +64,6 @@ def user_payload_factory():
     }
     user.update(**kwargs)
     return user
-
   return _user_payload_factory
 
 

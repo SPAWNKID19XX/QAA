@@ -1,7 +1,6 @@
 from django.contrib.auth.password_validation import validate_password
 from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
-
 from .models import User
 
 
@@ -10,6 +9,11 @@ class UserSerializer(serializers.ModelSerializer):
         model = User
         fields = ["id", "username", "email", "role", "is_staff", "date_joined"]
         read_only_fields = ["id", "is_staff", "date_joined"]
+
+class LoginUserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ["id", "username", "role", ]
 
 
 class UserPublicSerializer(serializers.ModelSerializer):
@@ -42,5 +46,5 @@ class MeUpdateSerializer(serializers.ModelSerializer):
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     def validate(self, attrs):
         data = super().validate(attrs)
-        data["user"] = UserSerializer(self.user).data
+        data["user"] = LoginUserSerializer(self.user).data
         return data

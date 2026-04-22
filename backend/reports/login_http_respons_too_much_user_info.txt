@@ -1,0 +1,43 @@
+id: Login0001
+test_id: test_login_valid_credentials_succeeded
+summary: To send login post request, api return us to many fields
+steps to reproduce:
+1.Run docker-compose up --build
+2.Run docker-compose exec backend pytest
+3.Send to url "/api/auth/login/" 
+    data =  {
+      "username": f"payload_user_1",
+      "password": "testpass",
+    } 
+results:
+1:expected by documentation (Readme.md )
+  {
+    'refresh': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoicmVmcmVzaCIsImV4cCI6MTc3NzQ5MDA2NCwiaWF0IjoxNzc2ODg1MjY0LCJqdGkiOiJjMGY5N2RhN2FmMTc0YzA3YjNiODRmODQ0NDMwZmYzMiIsInVzZXJfaWQiOiIyMSJ9.zeS9gRAJM6X1_m6g83lj-gHlxe8uFuWpcEYL3sRDRhU', 
+    'access': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzc2ODg4ODY0LCJpYXQiOjE3NzY4ODUyNjQsImp0aSI6IjMzNTZiNDRkMWExYzQ0ZmRhZTExOWIxOWVhNDNjM2Y0IiwidXNlcl9pZCI6IjIxIn0.wXeksbfdGKP4RgsnDwk_aroDfrSs8lfG2y71gkGkTU4',  
+    'user': {
+      "access": "<jwt_access_token>",
+      "refresh": "<jwt_refresh_token>",
+      "user": { "id": 2, "username": "factory_user_1", "role": "user" }
+    }
+  }
+2:actual status_code = 200
+  {
+    'refresh': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoicmVmcmVzaCIsImV4cCI6MTc3NzQ5MDA2NCwiaWF0IjoxNzc2ODg1MjY0LCJqdGkiOiJjMGY5N2RhN2FmMTc0YzA3YjNiODRmODQ0NDMwZmYzMiIsInVzZXJfaWQiOiIyMSJ9.zeS9gRAJM6X1_m6g83lj-gHlxe8uFuWpcEYL3sRDRhU', 
+    'access': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzc2ODg4ODY0LCJpYXQiOjE3NzY4ODUyNjQsImp0aSI6IjMzNTZiNDRkMWExYzQ0ZmRhZTExOWIxOWVhNDNjM2Y0IiwidXNlcl9pZCI6IjIxIn0.wXeksbfdGKP4RgsnDwk_aroDfrSs8lfG2y71gkGkTU4', 
+    'user': {
+      'id': 21, 
+      'username': 'factory_user_1', 
+      'email': 'factory_email_1@mail.com', 
+      'role': 'user', 
+      'is_staff': False, 
+      'date_joined': '2026-04-22T19:14:24.553084Z'
+      }
+    }
+Severity / Priority — Major
+environment:
+  Python: Python 3.14.3, 
+  Django: 5.2.13
+  gitBranch: QAA    
+log:
+  AssertionError: assert 6 == 3
+E        +  where 6 = len({'date_joined': '2026-04-22T19:18:55.286956Z', 'email': 'factory_email_1@mail.com', 'id': 21, 'is_staff': False, ...})

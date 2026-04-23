@@ -51,7 +51,7 @@ class TestLogin:
         assert "user" in response_data
         assert "extra_field" not in response_data
 
-    def test_login_with_spaces_before_after_username_fails(self, api_client, user_factory):
+    def test_login_with_spaces_before_after_username_successed(self, api_client, user_factory):
         user = user_factory()
 
         response = api_client.post("/api/auth/login/", data={
@@ -117,7 +117,7 @@ class TestLogin:
         assert user_data['role'] == user.role
         assert "password" not in user_data
 
-    def test_login_with_spaces_before_after_password_fails(self, api_client, user_factory):
+    def test_login_with_spaces_before_after_password_successed(self, api_client, user_factory):
         user = user_factory()
 
         response = api_client.post("/api/auth/login/", data={
@@ -228,35 +228,6 @@ class TestLogin:
         assert "access" not in response.json()
         assert "refresh" not in response.json()
 
-    def test_login_get_request_405(self, api_client):
-        response = api_client.get("/api/auth/login/")
-        assert response.status_code == 405
-        assert "detail" in response.json()
-        assert "access" not in response.json()
-        assert "refresh" not in response.json()
-
-    def test_login_put_request_405(self, api_client):
-        response = api_client.put("/api/auth/login/", data={}, format="json")
-        assert response.status_code == 405
-        assert "detail" in response.json()
-        assert "access" not in response.json()
-        assert "refresh" not in response.json()
-
-    def test_login_delete_request_405(self, api_client):
-        response = api_client.delete("/api/auth/login/")
-        assert response.status_code == 405
-        assert "detail" in response.json()
-        assert "access" not in response.json()
-        assert "refresh" not in response.json()
-
-    def test_login_patch_request_405(self, api_client):
-        
-        response = api_client.patch("/api/auth/login/", data={}, format="json")
-        assert response.status_code == 405
-        assert "detail" in response.json()
-        assert "access" not in response.json()
-        assert "refresh" not in response.json()
-
     def test_login_with_is_inactive_user_fails(self, api_client, user_factory):
         
         user = user_factory(is_active=False)
@@ -270,6 +241,14 @@ class TestLogin:
         assert "access" not in response.json()
         assert "refresh" not in response.json()
 
+
+    @pytest.mark.parametrize("method", ["get", "delete", "patch", "put"])
+    def test_login_wrong_methods_return_405(self, api_client, method):                              
+      response = getattr(api_client, method)("/api/auth/login/")                                  
+      assert response.status_code == 405
+      assert "detail" in response.json()
+      assert "access" not in response.json()
+      assert "refresh" not in response.json()       
 
     def test_login_head_405(self, api_client):
         response = api_client.head("/api/auth/login/")

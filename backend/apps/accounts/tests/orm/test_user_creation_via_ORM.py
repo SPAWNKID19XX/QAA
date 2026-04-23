@@ -144,7 +144,7 @@ class TestUserFieldsValidation:
 
   def test_role_field_accepts_valid_choices(self, user_factory):
     user = user_factory(role='admin')
-    assert user.role in ['user', 'admin']
+    assert user.role == 'admin'
 
   def test_role_field_rejects_invalid_choices(self, build_user):
     user = build_user(role='invalid_role')

@@ -190,11 +190,8 @@ class TestSignUpAPI:
     assert "username" in response_data
     assert user is None
 
-  def test_get_to_signup_endpoint_fails(self, api_client):
-    response = api_client.get("/api/auth/register/")
-    assert response.status_code == 405
-
-  def test_put_to_signup_endpoint_fails(self, api_client, user_payload_factory):
+  @pytest.mark.parametrize('method',["get","put","delete","patch"])
+  def test_dangerous_http_methods_signup_endpoint_fails(self,method ,api_client, user_payload_factory):
     payload_data = user_payload_factory()
-    response = api_client.put("/api/auth/register/", data=payload_data, format="json")
+    response = getattr(api_client, method)("/api/auth/register/", data=payload_data, format="json")
     assert response.status_code == 405

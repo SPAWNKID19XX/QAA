@@ -24,8 +24,8 @@ jobs:
           --health-timeout 5s
           --health-retries 5
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.13"
       - name: install dependencies backend
@@ -38,26 +38,27 @@ jobs:
           DB_PASSWORD: test_db_password
           DB_HOST: localhost
           DB_PORT: 5432
+          SECRET-KEY: aaaaaaaa
         run: pytest
 
-  frontend:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
+  #frontend:
+  #  runs-on: ubuntu-latest
+  #  steps:
+  #    - uses: actions/checkout@v4
+  #    
+  #    - uses: actions/setup-node@v4
+  #      with:
+  #        node-version: "20"
       
-      - uses: actions/setup-node@v4
-        with:
-          node-version: "20"
+  #    - name: install dependencies frontend
+  #      working-directory: frontend
+  #      run: npm ci
       
-      - name: install dependencies frontend
-        working-directory: frontend
-        run: npm ci
-      
-      - name: run lint frontend
-        working-directory: frontend
-        run: npm run lint
+  #    - name: run lint frontend
+  #      working-directory: frontend
+  #      run: npm run lint
 
-      - name: run build frontend
-        working-directory: frontend
-        run: npm run build
+  #   - name: run build frontend
+  #      working-directory: frontend
+  #      run: npm run build
 

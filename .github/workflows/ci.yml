@@ -38,7 +38,7 @@ jobs:
           DB_PASSWORD: test_db_password
           DB_HOST: localhost
           DB_PORT: 5432
-          SECRET-KEY: aaaaaaaa
+          SECRET_KEY: any-random-string-for-ci
         run: pytest
 
   #frontend:

@@ -1,0 +1,64 @@
+name: QAA-treinier
+
+on:
+  push:
+    branches: [master, QAA]
+  pull_request:
+    branches: [master]
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_DB: test_db_name
+          POSTGRES_USER: test_db_user
+          POSTGRES_PASSWORD: test_db_password
+        ports:
+          - 5432:5432 
+        options: >-
+          --health-cmd pg_isready                                                                   
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+      - name: install dependencies backend
+        run: pip install -r backend/requirements.txt
+      - name: Run tests backend
+        working-directory: backend
+        env:
+          DB_NAME: test_db_name
+          DB_USER: test_db_user
+          DB_PASSWORD: test_db_password
+          DB_HOST: localhost
+          DB_PORT: 5432
+          SECRET_KEY: any-random-string-for-ci
+        run: pytest
+
+  #frontend:
+  #  runs-on: ubuntu-latest
+  #  steps:
+  #    - uses: actions/checkout@v4
+  #    
+  #    - uses: actions/setup-node@v4
+  #      with:
+  #        node-version: "20"
+      
+  #    - name: install dependencies frontend
+  #      working-directory: frontend
+  #      run: npm ci
+      
+  #    - name: run lint frontend
+  #      working-directory: frontend
+  #      run: npm run lint
+
+  #   - name: run build frontend
+  #      working-directory: frontend
+  #      run: npm run build
+

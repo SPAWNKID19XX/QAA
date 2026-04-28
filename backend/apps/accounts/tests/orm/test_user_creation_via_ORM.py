@@ -65,69 +65,6 @@ class TestUserFieldsValidation:
       )
       user.full_clean()
 
-  def test_user_username_below_max_length_full_clean_validation(self, build_user):
-    user = build_user (
-        username=make_string(149), 
-      )
-    user.full_clean()
-    assert user.username == make_string(149)
-  
-  def test_user_username_at_max_length_full_clean_validation(self, build_user):
-    user = build_user (
-        username=make_string(150), 
-      )
-    user.full_clean()
-    assert user.username == make_string(150)
-
-  def test_user_username_above_max_length_full_clean_validation(self, build_user):
-    with pytest.raises(ValidationError):
-      user = build_user(
-          username=make_string(151), 
-        )
-      user.full_clean()      
-
-  def test_user_first_name_below_max_length_full_clean_validation(self, build_user):
-    user = build_user (
-        first_name=make_string(149)
-      )
-    user.full_clean()
-    assert user.first_name == make_string(149)
-
-  def test_user_first_name_at_max_length_full_clean_validation(self, build_user):
-    user = build_user (
-        first_name=make_string(150)
-      )
-    user.full_clean()
-    assert user.first_name == make_string(150)
-
-  def test_user_first_name_above_max_length_full_clean_validation(self, build_user):
-    with pytest.raises(ValidationError):
-      user = build_user(
-          first_name=make_string(151)
-        )
-      user.full_clean()      
-
-  def test_user_last_name_below_max_length_full_clean_validation(self, build_user):
-    user = build_user (
-        last_name=make_string(149)
-      )
-    user.full_clean()
-    assert user.last_name == make_string(149)
-
-  def test_user_last_name_at_max_length_full_clean_validation(self, build_user):
-    user = build_user (
-        last_name=make_string(150)
-      )
-    user.full_clean()
-    assert user.last_name == make_string(150)
-
-  def test_user_last_name_above_max_length_full_clean_validation(self, build_user):
-    with pytest.raises(ValidationError):
-      user = build_user(
-          last_name=make_string(151)
-        )
-      user.full_clean()      
-
   def test_username_duplicate_has_message_error(self, user_factory, build_user):
 
     existing_user = user_factory(username="existinguser")
@@ -144,7 +81,7 @@ class TestUserFieldsValidation:
 
   def test_role_field_accepts_valid_choices(self, user_factory):
     user = user_factory(role='admin')
-    assert user.role in ['user', 'admin']
+    assert user.role == 'admin'
 
   def test_role_field_rejects_invalid_choices(self, build_user):
     user = build_user(role='invalid_role')
@@ -164,3 +101,25 @@ class TestUserFieldsValidation:
   def test_is_admin_property_returns_false_for_regular_user(self, user_factory):
     user = user_factory(role='user', is_staff=False)
     assert not user.is_admin
+
+  
+  @pytest.mark.parametrize(
+      "field, size, result", [
+        ("username", 149, True),
+        ("username", 150, True),
+        ("username", 151, False),
+        ("first_name", 149, True),
+        ("first_name", 150, True),
+        ("first_name", 151, False),
+        ("last_name", 149, True),
+        ("last_name", 150, True),
+        ("last_name", 151, False)
+      ])
+  def test_length_full_clean_validation(self, build_user,field,size,result):
+    user = build_user(**{field: make_string(size)})
+    if result:
+      user.full_clean()
+      assert getattr(user, field) == make_string(size)
+    else:
+      with pytest.raises(ValidationError):
+        user.full_clean()

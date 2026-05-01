@@ -75,3 +75,41 @@ def logged_in_user(api_client, user_factory):
 @pytest.fixture
 def api_client():
   return APIClient()
+
+@pytest.fixture
+def project_factory():
+  from apps.projects.models import Project
+
+  counter = 0
+
+  def _project_factory(owner, **kwargs):
+    nonlocal counter
+    counter += 1
+
+    data = {
+      "title": f"Project {counter}",
+      "description": f"Description for project {counter}",
+      "status": "active",
+      "owner": owner
+    }
+    data.update(**kwargs)
+    return Project.objects.create(**data)
+
+  return _project_factory
+
+@pytest.fixture
+def project_payload_factory():
+  counter = 0
+
+  def _project_payload_factory(**kwargs):
+    nonlocal counter
+    counter += 1
+    project =  {
+      "title": f"Project {counter}",
+      "description": f"Description for project {counter}",
+      "status": "active"
+    }
+    project.update(**kwargs)
+    return project
+  
+  return _project_payload_factory

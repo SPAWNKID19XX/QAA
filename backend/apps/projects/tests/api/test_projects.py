@@ -4,14 +4,9 @@ from apps.projects.models import Project
 
 @pytest.mark.django_db
 class TestProjects:
-  def test_post_new_projects_by_auth_userreturns_201(self, logged_in_user):
+  def test_post_new_projects_by_auth_user_returns_201(self, logged_in_user, project_payload_factory):
     client, user = logged_in_user
-
-    project_data = {
-      "title": "Test Project",
-      "description": "A test project",
-      "status": "active"
-    }
+    project_data = project_payload_factory()
 
     response = client.post(
       "/api/projects/", 
@@ -20,27 +15,22 @@ class TestProjects:
     )
 
     assert response.status_code == 201
-    assert response.data["title"] == "Test Project"
-    assert response.data["description"] == "A test project"
-    assert response.data["status"] == "active"
+    assert response.data["title"] == project_data["title"]
+    assert response.data["description"] == project_data["description"]
+    assert response.data["status"] == project_data["status"]
     assert response.data["owner"]['id'] == user.id
     
     db_project = Project.objects.get(id=response.data["id"])
-    assert db_project.title == "Test Project"
-    assert db_project.description == "A test project"
-    assert db_project.status == "active"
+    assert db_project.title == project_data["title"]
+    assert db_project.description == project_data["description"]
+    assert db_project.status == project_data["status"]
     assert db_project.owner.id == user.id
 
-  def test_post_new_projects_with_blank_title_by_logged_user_returns_400(self, logged_in_user):
+  def test_post_new_projects_with_blank_title_by_logged_user_returns_400(self, logged_in_user, project_payload_factory):
     client, user = logged_in_user
-    
-    project_data = {
-      "title": "",
-      "description": "A test project",
-      "status": "active"
-    }
-    count_before = Project.objects.count()
+    project_data = project_payload_factory(title="")
 
+    count_before = Project.objects.count()
 
     response = client.post(
       "/api/projects/", 
@@ -53,13 +43,11 @@ class TestProjects:
     assert "title" in response.data
     assert count_after == count_before
 
-  def test_post_new_projects_without_title_by_logged_user_returns_400(self, logged_in_user):
+  def test_post_new_projects_without_title_by_logged_user_returns_400(self, logged_in_user, project_payload_factory):
     client, user = logged_in_user
 
-    project_data = {
-      "description": "A test project",
-      "status": "active"
-    }
+    project_data = project_payload_factory()
+    project_data.pop("title")
 
     count_before = Project.objects.count()
 
@@ -68,20 +56,16 @@ class TestProjects:
       data=project_data,
       format="json"
     )
-    response_data = response.json()
     count_after = Project.objects.count()
     assert response.status_code == 400
-    assert "title" in response_data
+    assert "title" in response.data
     assert count_after == count_before
 
-  def test_post_new_projects_with_blank_description_by_logged_user_returns_201(self, logged_in_user):
+  def test_post_new_projects_with_blank_description_by_logged_user_returns_201(self, logged_in_user, project_payload_factory):
     client, user = logged_in_user
-    
-    project_data = {
-      "title": "New Project",
-      "description": "",
-      "status": "active"
-    }
+    project_data = project_payload_factory(
+      description=""
+    )
 
     response = client.post(
       "/api/projects/", 
@@ -89,24 +73,43 @@ class TestProjects:
       format="json"
     )
     assert response.status_code == 201
-    assert response.data["title"] == "New Project"
+    assert response.data["title"] == project_data["title"]
+    assert response.data["description"] == project_data["description"]
+    assert response.data["status"] == project_data["status"]
+    assert response.data["owner"]['id'] == user.id
+
+    db_project = Project.objects.get(id=response.data["id"])
+    assert db_project.title == project_data["title"]
+    assert db_project.description == project_data["description"]
+    assert db_project.status == project_data["status"]
+    assert db_project.owner.id == user.id
+
+  def test_post_new_projects_without_description_by_logged_user_returns_201(self, logged_in_user, project_payload_factory):
+    client, user = logged_in_user
+    project_data = project_payload_factory()
+    project_data.pop("description")
+
+    response = client.post(
+      "/api/projects/", 
+      data=project_data,
+      format="json"
+    )
+    assert response.status_code == 201
+    assert response.data["title"] == project_data["title"]
     assert response.data["description"] == ""
-    assert response.data["status"] == "active"
+    assert response.data["status"] == project_data["status"]
     assert response.data["owner"]['id'] == user.id
 
     db_project = Project.objects.get(id=response.data["id"])
-    assert db_project.title == "New Project"
+    assert db_project.title == project_data["title"]
     assert db_project.description == ""
-    assert db_project.status == "active"
+    assert db_project.status == project_data["status"]
     assert db_project.owner.id == user.id
 
-  def test_post_new_projects_without_description_by_logged_user_returns_201(self, logged_in_user):
+  def test_post_new_projects_without_status_by_logged_user_returns_201(self, logged_in_user, project_payload_factory):
     client, user = logged_in_user
-    
-    project_data = {
-      "title": "New Project",
-      "status": "active"
-    }
+    project_data = project_payload_factory()
+    project_data.pop("status")
 
     response = client.post(
       "/api/projects/", 
@@ -114,51 +117,21 @@ class TestProjects:
       format="json"
     )
     assert response.status_code == 201
-    assert response.data["title"] == "New Project"
-    assert response.data["description"] == ""
-    assert response.data["status"] == "active"
-    assert response.data["owner"]['id'] == user.id
-
-    db_project = Project.objects.get(id=response.data["id"])
-    assert db_project.title == "New Project"
-    assert db_project.description == ""
-    assert db_project.status == "active"
-    assert db_project.owner.id == user.id
-
-  def test_post_new_projects_without_status_by_logged_user_returns_201(self, logged_in_user):
-    client, user = logged_in_user
-
-    project_data = {
-      "title": "New Project",
-      "description": "test project description",
-    }
-
-    response = client.post(
-      "/api/projects/", 
-      data=project_data,
-      format="json"
-    )
-    assert response.status_code == 201
-    assert response.data["title"] == "New Project"
-    assert response.data["description"] == "test project description"
+    assert response.data["title"] == project_data["title"]
+    assert response.data["description"] == project_data["description"]  
     assert response.data["status"] == "active"
     assert response.data["owner"]['id'] == user.id
 
     db_project = Project.objects.get(id=response.data["id"])
     
-    assert db_project.title == "New Project"
-    assert db_project.description == "test project description"
+    assert db_project.title == project_data["title"]
+    assert db_project.description == project_data["description"]
     assert db_project.status == "active"
     assert db_project.owner.id == user.id
 
-  def test_post_new_projects_with_archived_status_by_logged_user_returns_201(self, logged_in_user):
+  def test_post_new_projects_with_archived_status_by_logged_user_returns_201(self, logged_in_user, project_payload_factory):
     client, user = logged_in_user
-
-    project_data = {
-      "title": "New Project",
-      "description": "test project description",
-      "status": "archived"
-    }
+    project_data = project_payload_factory(status="archived")
 
     response = client.post(
       "/api/projects/", 
@@ -166,48 +139,47 @@ class TestProjects:
       format="json"
     )
     assert response.status_code == 201
-    assert response.data["title"] == "New Project"
-    assert response.data["description"] == "test project description"
-    assert response.data["status"] == "archived"
+    assert response.data["title"] == project_data["title"]
+    assert response.data["description"] == project_data["description"]
+    assert response.data["status"] == project_data["status"]
     assert response.data["owner"]['id'] == user.id
 
     db_project = Project.objects.get(id=response.data["id"])
     
-    assert db_project.title == "New Project"
-    assert db_project.description == "test project description"
-    assert db_project.status == "archived"
+    assert db_project.title == project_data["title"]
+    assert db_project.description == project_data["description"]
+    assert db_project.status == project_data["status"]
     assert db_project.owner.id == user.id
 
-  def test_post_new_projects_with_blank_status_by_logged_user_returns_400(self, logged_in_user):
+  def test_post_new_projects_with_blank_status_by_logged_user_returns_400(self, logged_in_user, project_payload_factory):
     client, user = logged_in_user
-
-    project_data = {
-      "title": "New Project",
-      "description": "test project description",
-      "status": ""
-    }
-
+    project_data = project_payload_factory(status="")
+    
+    before_count = Project.objects.count()
     response = client.post(
       "/api/projects/", 
       data=project_data,
       format="json"
     )
+
+    after_count = Project.objects.count()
     assert response.status_code == 400
     assert "status" in response.data
+    assert after_count == before_count
 
-  def test_post_new_projects_with_invalid_status_by_logged_user_returns_400(self, logged_in_user):
+  def test_post_new_projects_with_invalid_status_by_logged_user_returns_400(self, logged_in_user, project_payload_factory):
     client, user = logged_in_user
+    project_data = project_payload_factory(status="Invalid Status")
 
-    project_data = {
-      "title": "New Project",
-      "description": "test project description",
-      "status": "Invalid Status"
-    }
+    before_count = Project.objects.count()
 
     response = client.post(
       "/api/projects/", 
       data=project_data,
       format="json"
     )
+    after_count = Project.objects.count()
+
     assert response.status_code == 400
     assert "status" in response.data
+    assert after_count == before_count

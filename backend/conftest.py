@@ -66,6 +66,11 @@ def user_payload_factory():
     return user
   return _user_payload_factory
 
+@pytest.fixture
+def logged_in_user(api_client, user_factory):
+  user = user_factory()
+  api_client.force_authenticate(user=user)
+  return api_client, user
 
 @pytest.fixture
 def api_client():

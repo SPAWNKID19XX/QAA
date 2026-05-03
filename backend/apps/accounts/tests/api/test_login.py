@@ -1,7 +1,4 @@
 import pytest
-from django.contrib.auth import get_user_model
-
-
 
 @pytest.mark.django_db
 class TestLogin:
@@ -240,7 +237,6 @@ class TestLogin:
         assert "detail" in response.json()
         assert "access" not in response.json()
         assert "refresh" not in response.json()
-
 
     @pytest.mark.parametrize("method", ["get", "delete", "patch", "put"])
     def test_login_wrong_methods_return_405(self, api_client, method):                              

@@ -29,7 +29,6 @@ class TestRefreshToken:
     assert 'refresh' not in refresh_request.json()
     assert len(refresh_request.json()['access']) > 0
     
-    
   def test_get_access_without_refresh_in_body_returns_400(self, api_client,user_payload_factory):
     user_response = api_client.post('/api/auth/register/', user_payload_factory(), format='json')
     user = user_response.json()['user']

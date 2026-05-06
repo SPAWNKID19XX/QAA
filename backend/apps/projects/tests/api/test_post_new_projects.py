@@ -4,7 +4,7 @@ from apps.accounts.tests.helpers.data import make_string
 from apps.projects.models import Project
 
 @pytest.mark.django_db
-class TestProjects:
+class TestProjectsPost:
   def test_post_new_projects_by_auth_user_returns_201(self, logged_in_user, project_payload_factory):
     client, user = logged_in_user
     project_data = project_payload_factory()
@@ -233,11 +233,11 @@ class TestProjects:
   def test_new_project_submit_unother_owner(self, logged_in_user, project_payload_factory,user_payload_factory):
     client, user = logged_in_user
     other_user = user_payload_factory()
-    project_data = project_payload_factory(owner=other_user)
     user_response = client.post("/api/auth/register/", data=other_user,format="json")
-    
+    onother_user_id = user_response.data['user']['id']
     assert user_response.status_code == 201
 
+    project_data = project_payload_factory(owner=onother_user_id)
     
     response = client.post(
       "/api/projects/", 

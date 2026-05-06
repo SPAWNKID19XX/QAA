@@ -1,0 +1,58 @@
+id: ProjectsGet0001
+test_id: test_get_projects_data_integrity
+summary: GET /api/projects/ response schema does not match README contract
+environment:
+  Python: Python 3.14.3, 
+  Django: 5.2.13
+  gitBranch: QAA  
+steps to reproduce:
+1.Run docker-compose up --build
+2.docker-compose exec -T backend pytest -s apps/projects/tests/api/test_get_existens_projects.py 
+3. Check the response body from GET /api/projects/
+  Expected result:
+  According to README.md, each project object in results should contain:
+  - id
+  - title
+  - description
+  - status
+  - owner with only id and username
+  - members_count
+  - created_at
+
+  The project object should not contain:
+  - project_members
+  - updated_at
+
+  actual result:
+  The response object does not match the documented schema:
+  - members_count is missing
+  - owner contains extra field email
+  - project_members is present
+  - updated_at is present
+
+  actual response example:
+  {
+    "id": 4,
+    "title": "Project 1",
+    "description": "Description for project 1",
+    "status": "active",
+    "owner": {
+      "id": 2,
+      "username": "factory_user_1",
+      "email": "factory_email_1@mail.com"
+    },
+    "project_members": [],
+    "created_at": "2026-05-06T19:38:51.216722Z",
+    "updated_at": "2026-05-06T19:38:51.216726Z"
+  }
+
+  evidence:
+  assert "members_count" in response_data
+  E AssertionError: assert 'members_count' in {...}
+
+Severity - Medium
+Priority — Medium  
+
+impact:
+  API consumers and automated tests that rely on the documented README contract cannot safely parse
+  the project list response.

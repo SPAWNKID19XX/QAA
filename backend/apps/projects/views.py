@@ -21,6 +21,11 @@ class ProjectViewSet(viewsets.ModelViewSet):
     serializer_class = ProjectSerializer
     filterset_class = ProjectFilter
 
+    def get_serializer(self, *args, **kwargs):
+        if self.action == "list":
+            kwargs["exclude_fields"] = ["project_members", "updated_at"]
+        return super().get_serializer(*args, **kwargs)
+
     def get_queryset(self):
         user = self.request.user
         if user.is_admin:

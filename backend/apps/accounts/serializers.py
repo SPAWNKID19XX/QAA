@@ -24,6 +24,14 @@ class UserPublicSerializer(serializers.ModelSerializer):
         fields = ["id", "username", "email"]
         read_only_fields = fields
 
+class OwnerProjectSerializer(serializers.ModelSerializer):
+    """Minimal Ownert representation used in nested contexts (e.g. Projects)."""
+
+    class Meta:
+        model = User
+        fields = ["id", "username"]
+        read_only_fields = fields
+
 
 class RegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, validators=[validate_password])

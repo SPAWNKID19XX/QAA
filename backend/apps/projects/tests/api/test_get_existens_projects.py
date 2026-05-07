@@ -26,9 +26,7 @@ class TestProjectsGet:
   def test_get_projects_data_integrity(self, logged_in_user, project_factory):
     client, user = logged_in_user
     new_project = project_factory(owner=user)
-
     response = client.get(self.url)
-    print(response.data)
 
     assert response.status_code == 200
     response_data = response.data['results'][0]
@@ -40,3 +38,19 @@ class TestProjectsGet:
     assert new_project.owner.id == response_data['owner']['id']
     assert new_project.owner.username == response_data['owner']['username']
     assert "members_count" in response_data
+    assert "project_members" not in response_data
+    assert "updated_at" not in response_data
+
+  def test_get_projects_owner_data_integrity(self, logged_in_user, project_factory):
+    client, user = logged_in_user
+    new_project = project_factory(owner=user)
+    response = client.get(self.url)
+
+    assert response.status_code == 200
+    response_data = response.data['results'][0]
+
+    assert response_data['owner']['id'] is not None
+    assert response_data['owner']['username'] is not None
+    assert len(response_data['owner']) == 2
+    assert response_data['owner']['id'] == new_project.owner.id
+    assert response_data['owner']['username'] == new_project.owner.username

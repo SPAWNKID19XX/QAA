@@ -1,7 +1,7 @@
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
 
-from apps.accounts.serializers import UserPublicSerializer
+from apps.accounts.serializers import UserPublicSerializer, OwnerProjectSerializer
 
 from .models import Project, ProjectMember
 
@@ -18,21 +18,22 @@ class ProjectMemberSerializer(serializers.ModelSerializer):
 
 
 class ProjectSerializer(serializers.ModelSerializer):
-    owner = UserPublicSerializer(read_only=True)
+    owner = OwnerProjectSerializer(read_only=True)
     project_members = ProjectMemberSerializer(many=True, read_only=True)
+    members_count = serializers.IntegerField(source="project_members.count", read_only=True)
+
+
+    def __init__(self, *args, **kwargs):
+        exclude_fields = kwargs.pop("exclude_fields", None)
+        super().__init__(*args, **kwargs)
+
+        if exclude_fields:
+            for field in exclude_fields:
+                self.fields.pop(field, None)
 
     class Meta:
         model = Project
-        fields = [
-            "id",
-            "title",
-            "description",
-            "status",
-            "owner",
-            "project_members",
-            "created_at",
-            "updated_at",
-        ]
+        fields = "__all__"
         read_only_fields = ["id", "owner", "project_members", "created_at", "updated_at"]
 
     def create(self, validated_data):
